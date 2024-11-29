@@ -1,5 +1,5 @@
 import { db } from "../firebase";
-import { addDoc, collection, getDocs, getDoc, doc, deleteDoc } from "firebase/firestore";
+import { addDoc, collection, getDocs, getDoc, doc } from "firebase/firestore";
 import { List } from "@/types/interfaces";
 
 export const getListById = async (id: string): Promise<List> => {
@@ -32,9 +32,4 @@ export const getLists = async (): Promise<List[]> => {
 export const addList = async (name: string): Promise<void> => {
   const listsRef = collection(db, "lists");
   await addDoc(listsRef, { name });
-};
-
-export const deleteList = async (id: string): Promise<void> => {
-  const listRef = doc(db, "lists", id);
-  await deleteDoc(listRef); 
 };

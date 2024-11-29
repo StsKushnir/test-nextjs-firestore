@@ -1,23 +1,32 @@
-import { List } from "@/types/interfaces";
+import { GetServerSideProps } from "next";
 import Link from "next/link";
+
+interface List {
+  id: string;
+  name: string;
+}
 
 interface ListsCollectionProps {
   lists: List[];
-  onDeleteList: (id: string) => Promise<void>;
 }
 
-export default function ListsCollection({
-  lists,
-  onDeleteList,
-}: ListsCollectionProps) {
-  const handleDeleteList = async (id: string) => {
-    try {
-      await onDeleteList(id);
-    } catch (error) {
-      console.error("Error deleting list:", error);
-    }
-  };
+export const getServerSideProps: GetServerSideProps = async () => {
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/lists`);
+    const lists: List[] = await res.json();
 
+    return {
+      props: { lists },
+    };
+  } catch (error) {
+    console.error("Error fetching lists:", error);
+    return {
+      props: { lists: [] },
+    };
+  }
+};
+
+const ListsCollection = ({ lists }: ListsCollectionProps) => {
   return (
     <div className="p-4 mt-8">
       <h2 className="text-xl font-bold mb-10">Your To-Do Lists</h2>
@@ -30,18 +39,12 @@ export default function ListsCollection({
               <div className="flex justify-between items-center">
                 <Link
                   href={`/lists/${list.id}`}
-                  className=" flex items-center justify-center w-[120px] h-[70px]  hover:bg-[#f0f0f0] bg-white rounded-lg transition-all duration-200"
+                  className="flex items-center justify-center w-[120px] h-[70px] hover:bg-[#f0f0f0] bg-white rounded-lg transition-all duration-200"
                 >
                   <p className="text-[#228B22] font-bold hover:scale-130 hover:text-[#2d6a4f] uppercase transition-all duration-200">
                     {list.name}
                   </p>
                 </Link>
-                <button
-                  onClick={() => handleDeleteList(list.id)}
-                  className="text-red-500 font-bold hover:underline ml-4"
-                >
-                  Delete
-                </button>
               </div>
             </li>
           ))
@@ -49,4 +52,6 @@ export default function ListsCollection({
       </ul>
     </div>
   );
-}
+};
+
+export default ListsCollection;
