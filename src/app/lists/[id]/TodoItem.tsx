@@ -1,60 +1,54 @@
 import { Todo } from "@/types/interfaces";
 import { useEditTodo } from "@/hooks/useEditTodo";
-import { handleSaveTodo, handleDeleteTodo } from "@/lib/todoHandlers";
+import { handleDeleteTodo, handleSaveTodo } from "@/lib/todoHandlers";
 import { TodoActionButtons } from "@/conponents/TodoActionButtons";
+import { TodoEditForm } from "@/conponents/TodoEditForm";
 
 interface TodoItemProps {
   todo: Todo;
   setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
   listId: string;
+  isDragged: boolean;
+  index: number;
 }
 
-export default function TodoItem({ todo, setTodos, listId }: TodoItemProps) {
+export default function TodoItem({
+  todo,
+  setTodos,
+  listId,
+  isDragged,
+  index,
+}: TodoItemProps) {
   const {
     editTodoId,
     editTodoName,
     editTodoDescription,
     startEditing,
     cancelEditing,
-    saveEdit,
     setEditTodoName,
     setEditTodoDescription,
   } = useEditTodo(todo);
 
+  const saveTodo = (name: string, description: string) => {
+    handleSaveTodo(listId, todo.id, name, description, setTodos);
+  };
+
   return (
-    <li className="max-w-[300px] h-[200px] flex flex-col bg-[#E0FFFF] rounded-lg shadow-md p-4">
+    <div
+      className={`w-[300px] h-[200px] flex flex-col shadow-md p-4 ${isDragged ? "bg-[#87CEFA]" : "bg-[#E0FFFF]"}`}
+    >
+      <div className="text-lg font-bold text-black mb-2">
+        #{index}
+      </div>
       {editTodoId === todo.id ? (
-        <div className="flex flex-col gap-2">
-          <input
-            type="text"
-            className="border p-2 text-black"
-            value={editTodoName}
-            onChange={(e) => setEditTodoName(e.target.value)}
-          />
-          <textarea
-            className="border p-2 text-black"
-            value={editTodoDescription}
-            onChange={(e) => setEditTodoDescription(e.target.value)}
-          />
-          <div className="flex justify-between mt-2">
-            <button
-              onClick={() =>
-                saveEdit((name, description) =>
-                  handleSaveTodo(listId, todo.id, name, description, setTodos)
-                )
-              }
-              className="bg-green-500 text-white py-1 px-4 rounded"
-            >
-              Save
-            </button>
-            <button
-              onClick={cancelEditing}
-              className="bg-gray-500 text-white py-1 px-4 rounded"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <TodoEditForm
+          editTodoName={editTodoName}
+          editTodoDescription={editTodoDescription}
+          setEditTodoName={setEditTodoName}
+          setEditTodoDescription={setEditTodoDescription}
+          saveEdit={saveTodo}
+          cancelEditing={cancelEditing}
+        />
       ) : (
         <div className="flex flex-col justify-between h-full">
           <div>
@@ -73,6 +67,6 @@ export default function TodoItem({ todo, setTodos, listId }: TodoItemProps) {
           />
         </div>
       )}
-    </li>
+    </div>
   );
 }
